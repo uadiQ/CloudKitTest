@@ -46,7 +46,7 @@
                             </barButtonItem>
                             <barButtonItem systemItem="add" id="uHy-TV-k0y">
                                 <connections>
-                                    <segue destination="XMm-c4-jF4" kind="presentation" id="T3y-TK-iNK"/>
+                                    <segue destination="XMm-c4-jF4" kind="presentation" modalPresentationStyle="currentContext" modalTransitionStyle="coverVertical" id="T3y-TK-iNK"/>
                                 </connections>
                             </barButtonItem>
                         </rightBarButtonItems>
@@ -104,7 +104,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                 </subviews>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="et4-3w-A8F" secondAttribute="bottom" id="0Qo-l0-n7b"/>
                                     <constraint firstAttribute="height" constant="200" id="QFY-lg-eW7"/>

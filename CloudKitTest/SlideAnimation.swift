@@ -30,13 +30,14 @@ class SlideAnimator: NSObject, UIViewControllerAnimatedTransitioning, UIViewCont
                 return
         }
         let container = transitionContext.containerView
+        
         let screenOffUp = CGAffineTransform(translationX: 0, y: -container.frame.height)
         let screenOffDown = CGAffineTransform(translationX: 0, y: container.frame.height)
         
         container.addSubview(fromView)
+        
         container.addSubview(toView)
         toView.transform = screenOffUp
-//        toView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
         
         
         
