@@ -40,7 +40,7 @@ class SlideAnimator: NSObject, UIViewControllerAnimatedTransitioning, UIViewCont
         
         
         
-        UIView.animate(withDuration: duration, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.8, options: [], animations: {
+        UIView.animate(withDuration: duration, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.8,  options:.curveEaseInOut, animations: {
             toView.transform = CGAffineTransform.identity
             toView.alpha = 1
             
