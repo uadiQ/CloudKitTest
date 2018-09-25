@@ -86,10 +86,10 @@
             </objects>
             <point key="canvasLocation" x="1834" y="133"/>
         </scene>
-        <!--View Controller-->
+        <!--Pop Over View Controller-->
         <scene sceneID="30F-Ot-ZhR">
             <objects>
-                <viewController id="XMm-c4-jF4" sceneMemberID="viewController">
+                <viewController id="XMm-c4-jF4" customClass="PopOverViewController" customModule="CloudKitTest" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="lnO-SW-Ck9">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -98,17 +98,28 @@
                                 <rect key="frame" x="50" y="233.5" width="275" height="200"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Testing popover" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="et4-3w-A8F">
-                                        <rect key="frame" x="0.0" y="0.0" width="275" height="200"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="275" height="160"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XLw-fF-8zY">
+                                        <rect key="frame" x="0.0" y="160" width="275" height="40"/>
+                                        <state key="normal" title="Close"/>
+                                        <connections>
+                                            <segue destination="KDg-k1-KHU" kind="unwind" unwindAction="prepareForUnwindWithSegue:" id="aFI-ir-RqB"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="bottom" secondItem="et4-3w-A8F" secondAttribute="bottom" id="0Qo-l0-n7b"/>
+                                    <constraint firstAttribute="bottom" secondItem="et4-3w-A8F" secondAttribute="bottom" constant="40" id="0Qo-l0-n7b"/>
+                                    <constraint firstItem="XLw-fF-8zY" firstAttribute="leading" secondItem="nPM-05-DR8" secondAttribute="leading" id="729-dq-9Od"/>
                                     <constraint firstAttribute="height" constant="200" id="QFY-lg-eW7"/>
+                                    <constraint firstItem="XLw-fF-8zY" firstAttribute="top" secondItem="et4-3w-A8F" secondAttribute="bottom" id="Vqy-HT-vt2"/>
+                                    <constraint firstAttribute="bottom" secondItem="XLw-fF-8zY" secondAttribute="bottom" id="XS6-tU-gZI"/>
                                     <constraint firstAttribute="trailing" secondItem="et4-3w-A8F" secondAttribute="trailing" id="fbC-d9-dB0"/>
+                                    <constraint firstAttribute="trailing" secondItem="XLw-fF-8zY" secondAttribute="trailing" id="gZj-Lh-e9s"/>
                                     <constraint firstItem="et4-3w-A8F" firstAttribute="leading" secondItem="nPM-05-DR8" secondAttribute="leading" id="iKX-Ru-44h"/>
                                     <constraint firstItem="et4-3w-A8F" firstAttribute="top" secondItem="nPM-05-DR8" secondAttribute="top" id="kh7-p0-suC"/>
                                 </constraints>
@@ -128,6 +139,7 @@
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="NY8-Yb-W7R" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="KDg-k1-KHU" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="1046" y="900"/>
         </scene>

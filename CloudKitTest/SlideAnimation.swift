@@ -11,11 +11,15 @@ import UIKit
 class SlideAnimator: NSObject, UIViewControllerAnimatedTransitioning, UIViewControllerTransitioningDelegate {
     
     let duration = 0.5
+    var isPresenting = false
     
     func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        isPresenting.toggle()
         return self
     }
+    
     func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        isPresenting.toggle()
         return self
     }
     
@@ -30,22 +34,21 @@ class SlideAnimator: NSObject, UIViewControllerAnimatedTransitioning, UIViewCont
                 return
         }
         let container = transitionContext.containerView
-        
-        let screenOffUp = CGAffineTransform(translationX: 0, y: -container.frame.height)
-        let screenOffDown = CGAffineTransform(translationX: 0, y: container.frame.height)
+        let screenOffUp = CGAffineTransform(translationX: 0, y: -container.frame.height) // положение над экраном, чтоб вью "выпало сверху"
+        let screenOffDown = CGAffineTransform(translationX: 0, y: container.frame.height) // положение, куда оно должно "свалиться"
         
         container.addSubview(fromView)
-        
         container.addSubview(toView)
-        toView.transform = screenOffUp
-        
-        
-        
+        if isPresenting {
+            toView.transform = screenOffUp
+        }
+
         UIView.animate(withDuration: duration, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.8,  options:.curveEaseInOut, animations: {
+            if self.isPresenting {
             toView.transform = CGAffineTransform.identity
-            toView.alpha = 1
-            
-            
+                toView.alpha = 1 } else {
+                fromView.transform = screenOffDown
+            }
         }) { success in
             transitionContext.completeTransition(success)
         }

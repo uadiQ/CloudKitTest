@@ -34,7 +34,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
-        fetchAllContacts()
+//        fetchAllContacts()
     }
     
     private func setupTableView() {
@@ -164,6 +164,8 @@ class ViewController: UIViewController {
         let destination = segue.destination
         destination.transitioningDelegate = slideAnimator
     }
+    
+    @IBAction func prepareForUnwind(segue: UIStoryboardSegue) {}
     
 }
 
