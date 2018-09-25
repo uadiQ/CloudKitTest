@@ -42,37 +42,6 @@ class ViewController: UIViewController {
                            forCellReuseIdentifier: ContactTableViewCell.reuseID)
     }
     
-    private func getAllContacts() -> [Contact] {
-        var result = [Contact]()
-        let contactStore = CNContactStore()
-        let keys = [CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
-                    CNContactPhoneNumbersKey,
-                    CNContactEmailAddressesKey,
-                    CNContactImageDataKey] as [Any]
-        let request = CNContactFetchRequest(keysToFetch: keys as! [CNKeyDescriptor])
-        do {
-            try contactStore.enumerateContacts(with: request) { (contact, stop) in
-                for phoneNumber in contact.phoneNumbers {
-                    if let imageData = contact.imageData,
-                        let image = UIImage(data: imageData) {
-                        
-                        let fullName = contact.familyName + " " + contact.givenName
-                        let phoneNumber = phoneNumber.value.stringValue
-                        let newContact = Contact.init(fullName: fullName,
-                                                      phoneNumber: phoneNumber,
-                                                      avatar: image)
-                        result.append(newContact)
-                        print("Contact \(newContact.fullName) added")
-                    }
-                    
-                }
-            }
-        } catch {
-            print("unable to fetch contacts")
-        }
-        return result
-    }
-    
     //ckreference to add favs
     
     private func contactRecord(from contact: Contact) -> CKRecord {
@@ -91,43 +60,29 @@ class ViewController: UIViewController {
         return contactToUpload
     }
     
-    private func plainContact(from record: CKRecord) -> Contact? {
-        let fullName = record.value(forKey: "fullName") as? String ?? ""
-        let phoneNumber = record.value(forKey: "phoneNumber") as? String ?? ""
-        guard let avatarAsset = record.value(forKey: "avatar") as? CKAsset,
-        let avatarImage = UIImage(contentsOfFile: avatarAsset.fileURL.path) else {
-            return nil
-        }
-        return Contact.init(fullName: fullName,
-                            phoneNumber: phoneNumber,
-                            avatar: avatarImage)
+    private func fetchAllContacts() {
+        HUD.show(.labeledProgress(title: "Loading...", subtitle: nil))
+        let query = CKQuery(recordType: "Contact", predicate: NSPredicate(value: true))
         
+        let operation = CKQueryOperation(query: query)
+        var resultingArray = [Contact]()
+        operation.recordFetchedBlock = { record in
+            print("record - \(record)")
+            guard let newContact = Contact.init(from: record) else {
+                print("failed to create contact from record")
+                return
+            }
+            resultingArray.append(newContact)
+        }
+        
+        operation.queryCompletionBlock = { cursor, _ in
+            self.uploadedContacts = resultingArray
+        }
+        database.add(operation)
     }
     
-        private func fetchAllContacts() {
-            HUD.show(.labeledProgress(title: "Loading...", subtitle: nil))
-            let query = CKQuery(recordType: "Contact", predicate: NSPredicate(value: true))
-    
-            let operation = CKQueryOperation(query: query)
-            var resultingArray = [Contact]()
-            operation.recordFetchedBlock = { [weak self] record in
-                print("record - \(record)")
-                guard let newContact = self?.plainContact(from: record) else {
-                    print("failed to create contact from record")
-                    return
-                }
-                resultingArray.append(newContact)
-            }
-    
-            operation.queryCompletionBlock = { cursor, _ in
-                self.uploadedContacts = resultingArray
-            }
-    
-            database.add(operation)
-        }
-    
     private func uploadContacts(completion: @escaping (Result<Void>) -> Void) {
-        let contactsToLoad = getAllContacts()
+        let contactsToLoad = PhoneContactsManager.phoneContactsWithAvatars()
         if contactsToLoad.isEmpty {
             completion( .fail(NoContactsError() ) )
         } else {
@@ -158,7 +113,7 @@ class ViewController: UIViewController {
                 print("Saved to iCloud")
                 print("\(saved?.compactMap{ $0.recordID.recordName } )")
                 for item in saved! {
-                    if let contact = self?.plainContact(from: item) {
+                    if let contact = Contact.init(from: item) {
                         resultingContacts.append(contact)
                     }
                 }
@@ -172,11 +127,6 @@ class ViewController: UIViewController {
     @IBAction func uploadPressed(_ sender: Any) {
         HUD.show(.labeledProgress(title: "Uploading...", subtitle: nil))
         DispatchQueue.global().async { [weak self] in
-            guard let contacts = self?.getAllContacts() else {
-                print("Didnt access to contacts")
-                return
-            }
-            
             self?.uploadContacts { result in
                 DispatchQueue.main.async {
                     HUD.hide()
@@ -207,14 +157,11 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: ContactTableViewCell.reuseID, for: indexPath)  as? ContactTableViewCell else {
             fatalError("wrong cell id")
         }
-        
         cell.favoritePressed = { [weak self] in
             self?.addToFavorite(contactIndex: indexPath.row)
         }
-        
         cell.update(contactName: uploadedContacts[indexPath.row].fullName)
-        
-        return UITableViewCell()
+        return cell
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
