@@ -20,11 +20,19 @@ class ViewController: UIViewController {
     
     let database = CKContainer.default().publicCloudDatabase
     
-    var uploadedContacts = [Contact]()
+    var uploadedContacts = [Contact]() {
+        didSet {
+            DispatchQueue.main.async { [weak self] in
+                HUD.hide()
+                self?.tableView.reloadData()
+            }
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
+        fetchAllContacts()
     }
     
     private func setupTableView() {
@@ -83,10 +91,40 @@ class ViewController: UIViewController {
         return contactToUpload
     }
     
-    
-    private func fetchContacts(completion: (Result<[String]>) -> Void) {
+    private func plainContact(from record: CKRecord) -> Contact? {
+        let fullName = record.value(forKey: "fullName") as? String ?? ""
+        let phoneNumber = record.value(forKey: "phoneNumber") as? String ?? ""
+        guard let avatarAsset = record.value(forKey: "avatar") as? CKAsset,
+        let avatarImage = UIImage(contentsOfFile: avatarAsset.fileURL.path) else {
+            return nil
+        }
+        return Contact.init(fullName: fullName,
+                            phoneNumber: phoneNumber,
+                            avatar: avatarImage)
         
     }
+    
+        private func fetchAllContacts() {
+            HUD.show(.labeledProgress(title: "Loading...", subtitle: nil))
+            let query = CKQuery(recordType: "Contact", predicate: NSPredicate(value: true))
+    
+            let operation = CKQueryOperation(query: query)
+            var resultingArray = [Contact]()
+            operation.recordFetchedBlock = { [weak self] record in
+                print("record - \(record)")
+                guard let newContact = self?.plainContact(from: record) else {
+                    print("failed to create contact from record")
+                    return
+                }
+                resultingArray.append(newContact)
+            }
+    
+            operation.queryCompletionBlock = { cursor, _ in
+                self.uploadedContacts = resultingArray
+            }
+    
+            database.add(operation)
+        }
     
     private func uploadContacts(completion: @escaping (Result<Void>) -> Void) {
         let contactsToLoad = getAllContacts()
@@ -98,15 +136,15 @@ class ViewController: UIViewController {
                 case .success:
                     completion(.success( () ))
                 case .fail(let error):
-                    debugPrint("Uploading error")
+                    debugPrint("Uploading error - \(error)")
                 }
             }
         }
-        
     }
     
     private func loadContactsToCloud(contacts: [Contact], completion: @escaping (Result<Void>) -> Void) {
         var records = [CKRecord]()
+        var resultingContacts = [Contact]()
         for contact in contacts {
             let contactToUpload = contactRecord(from: contact)
             records.append(contactToUpload)
@@ -119,25 +157,15 @@ class ViewController: UIViewController {
             } else {
                 print("Saved to iCloud")
                 print("\(saved?.compactMap{ $0.recordID.recordName } )")
-                self?.fetchRecords()
+                for item in saved! {
+                    if let contact = self?.plainContact(from: item) {
+                        resultingContacts.append(contact)
+                    }
+                }
+                self?.uploadedContacts = resultingContacts
                 completion(.success( () ))
             }
         }
-        database.add(operation)
-    }
-    
-    private func fetchRecords() {
-        let query = CKQuery(recordType: "Contact", predicate: NSPredicate(value: true))
-        
-        let operation = CKQueryOperation(query: query)
-        operation.recordFetchedBlock = {
-            print("\($0)")
-        }
-        
-        operation.queryCompletionBlock = { cursor, _ in
-            
-        }
-        
         database.add(operation)
     }
     

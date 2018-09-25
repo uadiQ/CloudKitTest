@@ -18,7 +18,7 @@ class ContactTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        selectionStyle = .none
+        self.selectionStyle = .none
     }
     
     var favoritePressed: (() -> Void)?

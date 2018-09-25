@@ -24,7 +24,9 @@
                         <constraints>
                             <constraint firstAttribute="width" constant="44" id="PKz-fi-PVT"/>
                         </constraints>
-                        <state key="normal" title="Button" image="checkmark"/>
+                        <state key="normal" title="Add">
+                            <color key="titleColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </state>
                         <connections>
                             <action selector="favoriteButtonPressed:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="Jp3-dk-MIj"/>
                         </connections>
@@ -50,10 +52,7 @@
             <connections>
                 <outlet property="contactName" destination="hXF-Eb-7Xl" id="TZK-5x-GUM"/>
             </connections>
-            <point key="canvasLocation" x="112" y="99.400299850074973"/>
+            <point key="canvasLocation" x="-43" y="109"/>
         </tableViewCell>
     </objects>
-    <resources>
-        <image name="checkmark" width="94" height="61"/>
-    </resources>
 </document>
