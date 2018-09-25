@@ -37,9 +37,10 @@ class SlideAnimator: NSObject, UIViewControllerAnimatedTransitioning, UIViewCont
         let screenOffUp = CGAffineTransform(translationX: 0, y: -container.frame.height) // положение над экраном, чтоб вью "выпало сверху"
         let screenOffDown = CGAffineTransform(translationX: 0, y: container.frame.height) // положение, куда оно должно "свалиться"
         
-        container.addSubview(fromView)
-        container.addSubview(toView)
+
         if isPresenting {
+            container.addSubview(fromView)
+            container.addSubview(toView)
             toView.transform = screenOffUp
         }
 
