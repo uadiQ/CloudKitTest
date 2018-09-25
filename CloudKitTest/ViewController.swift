@@ -18,6 +18,8 @@ struct NoContactsError: Error {
 class ViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     
+    let slideAnimator = SlideAnimator()
+    
     let database = CKContainer.default().publicCloudDatabase
     
     var uploadedContacts = [Contact]() {
@@ -41,8 +43,6 @@ class ViewController: UIViewController {
         tableView.register(ContactTableViewCell.nib,
                            forCellReuseIdentifier: ContactTableViewCell.reuseID)
     }
-    
-    //ckreference to add favs
     
     private func contactRecord(from contact: Contact) -> CKRecord {
         let contactToUpload = CKRecord(recordType: "Contact")
@@ -111,7 +111,7 @@ class ViewController: UIViewController {
                 completion(.fail(savingError))
             } else {
                 print("Saved to iCloud")
-                print("\(saved?.compactMap{ $0.recordID.recordName } )")
+//                print("\(saved?.compactMap{ $0.recordID.recordName } )")
                 for item in saved! {
                     if let contact = Contact.init(from: item) {
                         resultingContacts.append(contact)
@@ -143,7 +143,26 @@ class ViewController: UIViewController {
     }
     
     private func addToFavorite(contactIndex: Int) {
+        let favorites = CKRecord(recordType: "Favorites")
+        let addingContact = uploadedContacts[contactIndex]
+        let addingContactRecord = contactRecord(from: addingContact)
+        let reference = CKRecord.Reference(recordID: addingContactRecord.recordID, action: .deleteSelf)
+        let referenceArray = [reference]
+        favorites["contacts"] = referenceArray
         
+        database.save(favorites) { (record, error) in
+            if let savingError = error {
+                debugPrint("saving erorr - \(savingError)")
+            } else {
+                debugPrint("Saved to favorites")
+            }
+            
+        }
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let destination = segue.destination
+        destination.transitioningDelegate = slideAnimator
     }
     
 }
@@ -165,9 +184,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 44.0
+        return 60.0
     }
-    
-    
 }
 
