@@ -48,17 +48,21 @@ class FavoritesViewController: UIViewController {
         guard let references = favorite["contacts"] as? [CKRecord.Reference] else {
             return
         }
+        let referencesID = references.map { $0.recordID }
         
-        for item in references {
-            let recordID = item.recordID
-            database.fetch(withRecordID: recordID) { [weak self] (record, error) in
-                if let fetchingError = error {
-                    debugPrint("fetching error - \(fetchingError)")
-                } else {
-                    
-                }
-            }
-        }
+        let fetchOperation = CKFetchRecordsOperation(recordIDs: referencesID)
+        var favoritesArray = [Contact]()
+        
+//        for item in references {
+//            let recordID = item.recordID
+//            database.fetch(withRecordID: recordID) { [weak self] (record, error) in
+//                if let fetchingError = error {
+//                    debugPrint("fetching error - \(fetchingError)")
+//                } else {
+//
+//                }
+//            }
+//        }
     }
     
     

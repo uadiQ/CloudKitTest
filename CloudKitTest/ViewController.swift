@@ -177,7 +177,7 @@ class ViewController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let destination = segue.destination
         destination.transitioningDelegate = slideAnimator
-//                destination.modalPresentationStyle = .custom
+        destination.modalPresentationStyle = .custom
     }
     
     @IBAction func prepareForUnwind(segue: UIStoryboardSegue) {}
