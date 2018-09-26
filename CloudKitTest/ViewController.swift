@@ -36,8 +36,8 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
-        fetchAllContacts()
-        fetchFavoritesRecord()
+//        fetchAllContacts()
+//        fetchFavoritesRecord()
     }
     
     private func setupTableView() {
@@ -45,27 +45,6 @@ class ViewController: UIViewController {
         tableView.dataSource = self
         tableView.register(ContactTableViewCell.nib,
                            forCellReuseIdentifier: ContactTableViewCell.reuseID)
-    }
-    
-    private func contactRecord(from contact: Contact) -> CKRecord {
-        let contactToUpload: CKRecord
-        if let recordName = contact.recordID {
-            let contactID = CKRecord.ID(recordName: recordName)
-            contactToUpload = CKRecord(recordType: "Contact", recordID: contactID)
-        } else {
-            contactToUpload = CKRecord(recordType: "Contact")
-        }
-        contactToUpload.setValue(contact.fullName, forKey: "fullName")
-        contactToUpload.setValue(contact.phoneNumber, forKey: "phoneNumber")
-        let jpegImage = contact.avatar.jpegData(compressionQuality: 0.8)
-        let fileURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(contact.fullName)
-        guard let _ = try? jpegImage?.write(to: fileURL) else {
-            print("error at saving to local storage")
-            fatalError()
-        }
-        let asset = CKAsset(fileURL: fileURL)
-        contactToUpload.setValue(asset, forKey: "avatar")
-        return contactToUpload
     }
     
     private func fetchAllContacts() {
@@ -124,7 +103,7 @@ class ViewController: UIViewController {
         var records = [CKRecord]()
         var resultingContacts = [Contact]()
         for contact in contacts {
-            let contactToUpload = contactRecord(from: contact)
+            let contactToUpload = contact.record()
             records.append(contactToUpload)
         }
         let operation = CKModifyRecordsOperation(recordsToSave: records, recordIDsToDelete: nil)
@@ -168,7 +147,7 @@ class ViewController: UIViewController {
     private func addToFavorite(contactIndex: Int) {
         
         let addingContact = uploadedContacts[contactIndex]
-        let addingContactRecord = contactRecord(from: addingContact)
+        let addingContactRecord = addingContact.record()
         let reference = CKRecord.Reference(recordID: addingContactRecord.recordID, action: .deleteSelf)
 
         
@@ -198,7 +177,7 @@ class ViewController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let destination = segue.destination
         destination.transitioningDelegate = slideAnimator
-        //        destination.modalPresentationStyle = .custom
+//                destination.modalPresentationStyle = .custom
     }
     
     @IBAction func prepareForUnwind(segue: UIStoryboardSegue) {}

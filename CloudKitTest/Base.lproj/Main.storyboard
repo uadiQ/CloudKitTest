@@ -59,10 +59,10 @@
             </objects>
             <point key="canvasLocation" x="1046" y="133"/>
         </scene>
-        <!--View Controller-->
+        <!--Favorites View Controller-->
         <scene sceneID="fHd-cp-8cu">
             <objects>
-                <viewController id="wtJ-aa-2Az" sceneMemberID="viewController">
+                <viewController id="wtJ-aa-2Az" customClass="FavoritesViewController" customModule="CloudKitTest" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="gGJ-ZP-xcA">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -81,6 +81,9 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="KmA-vj-VNG"/>
                     </view>
+                    <connections>
+                        <outlet property="tableView" destination="sMo-eh-Hct" id="mCv-uT-LXc"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4uY-uW-51W" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

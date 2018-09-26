@@ -41,6 +41,7 @@ class SlideAnimator: NSObject, UIViewControllerAnimatedTransitioning, UIViewCont
         if isPresenting {
             container.addSubview(fromView)
             container.addSubview(toView)
+//            toView.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 350)
             toView.transform = screenOffUp
         }
 
