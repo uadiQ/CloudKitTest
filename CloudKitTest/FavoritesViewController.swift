@@ -8,39 +8,46 @@
 
 import UIKit
 import CloudKit
+import PKHUD
 
 class FavoritesViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     
-    var favorites: CKRecord! {
+    var favorites: CKRecord!
+    
+    var favoriteContacts: [Contact] = [] {
         didSet {
-            //reload table here
+            DispatchQueue.main.async {[weak self] in
+                HUD.hide()
+                self?.tableView.reloadData()
+            }
         }
     }
     
-    var favoriteContacts: [Contact] = []
-    
-    
     let database = CKContainer.default().publicCloudDatabase
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupTableView()
         fetchFavoritesRecord()
     }
     
     private func fetchFavoritesRecord() {
+        HUD.show(.labeledProgress(title: "Loading...", subtitle: ""))
         let query = CKQuery(recordType: "Favorites", predicate: NSPredicate(value: true))
         let operation = CKQueryOperation(query: query)
         operation.recordFetchedBlock = {[weak self] record in
             print("favorites fetched")
             self?.favorites = record
-        }
-        
-        operation.queryCompletionBlock = { cursor, _ in
             
         }
         
+        operation.queryCompletionBlock = {[weak self] cursor, _ in
+            if let favoritesList = self?.favorites {
+                self?.fetchFavorites(from: favoritesList)
+            }
+        }
         database.add(operation)
     }
     
@@ -53,16 +60,17 @@ class FavoritesViewController: UIViewController {
         let fetchOperation = CKFetchRecordsOperation(recordIDs: referencesID)
         var favoritesArray = [Contact]()
         
-//        for item in references {
-//            let recordID = item.recordID
-//            database.fetch(withRecordID: recordID) { [weak self] (record, error) in
-//                if let fetchingError = error {
-//                    debugPrint("fetching error - \(fetchingError)")
-//                } else {
-//
-//                }
-//            }
-//        }
+        fetchOperation.fetchRecordsCompletionBlock = { [weak self] records, error in
+            if let responseRecords = records {
+                for record in responseRecords {
+                    if let contact = Contact.init(from: record.value) {
+                        favoritesArray.append(contact)
+                    }
+                }
+                self?.favoriteContacts = favoritesArray
+            }
+        }
+        database.add(fetchOperation)
     }
     
     
