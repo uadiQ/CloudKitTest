@@ -31,10 +31,13 @@ class ViewController: UIViewController {
         }
     }
     
+    var favorites: CKRecord?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
-//        fetchAllContacts()
+        fetchAllContacts()
+        fetchFavoritesRecord()
     }
     
     private func setupTableView() {
@@ -45,10 +48,15 @@ class ViewController: UIViewController {
     }
     
     private func contactRecord(from contact: Contact) -> CKRecord {
-        let contactToUpload = CKRecord(recordType: "Contact")
+        let contactToUpload: CKRecord
+        if let recordName = contact.recordID {
+            let contactID = CKRecord.ID(recordName: recordName)
+            contactToUpload = CKRecord(recordType: "Contact", recordID: contactID)
+        } else {
+            contactToUpload = CKRecord(recordType: "Contact")
+        }
         contactToUpload.setValue(contact.fullName, forKey: "fullName")
         contactToUpload.setValue(contact.phoneNumber, forKey: "phoneNumber")
-        
         let jpegImage = contact.avatar.jpegData(compressionQuality: 0.8)
         let fileURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(contact.fullName)
         guard let _ = try? jpegImage?.write(to: fileURL) else {
@@ -78,6 +86,21 @@ class ViewController: UIViewController {
         operation.queryCompletionBlock = { cursor, _ in
             self.uploadedContacts = resultingArray
         }
+        database.add(operation)
+    }
+    
+    private func fetchFavoritesRecord() {
+        let query = CKQuery(recordType: "Favorites", predicate: NSPredicate(value: true))
+        let operation = CKQueryOperation(query: query)
+        operation.recordFetchedBlock = {[weak self] record in
+            print("favorites fetched")
+            self?.favorites = record
+        }
+        
+        operation.queryCompletionBlock = { cursor, _ in
+            
+        }
+        
         database.add(operation)
     }
     
@@ -111,7 +134,7 @@ class ViewController: UIViewController {
                 completion(.fail(savingError))
             } else {
                 print("Saved to iCloud")
-//                print("\(saved?.compactMap{ $0.recordID.recordName } )")
+                //                print("\(saved?.compactMap{ $0.recordID.recordName } )")
                 for item in saved! {
                     if let contact = Contact.init(from: item) {
                         resultingContacts.append(contact)
@@ -143,14 +166,26 @@ class ViewController: UIViewController {
     }
     
     private func addToFavorite(contactIndex: Int) {
-        let favorites = CKRecord(recordType: "Favorites")
+        
         let addingContact = uploadedContacts[contactIndex]
         let addingContactRecord = contactRecord(from: addingContact)
         let reference = CKRecord.Reference(recordID: addingContactRecord.recordID, action: .deleteSelf)
-        let referenceArray = [reference]
-        favorites["contacts"] = referenceArray
+
         
-        database.save(favorites) { (record, error) in
+        //add check if favorites exists, create new one or append to existing one
+        if let favoritesList = favorites {
+            guard var existingRecords = favoritesList["contacts"] as? [CKRecord.Reference] else {
+                return
+            }
+            existingRecords.append(reference)
+            favoritesList["contacts"] = existingRecords
+            favorites = favoritesList
+        } else {
+            self.favorites = CKRecord(recordType: "Favorites")
+            let referenceArray = [reference]
+            favorites?["contacts"] = referenceArray
+        }
+        database.save(favorites!) { (record, error) in
             if let savingError = error {
                 debugPrint("saving erorr - \(savingError)")
             } else {
@@ -163,6 +198,7 @@ class ViewController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let destination = segue.destination
         destination.transitioningDelegate = slideAnimator
+        //        destination.modalPresentationStyle = .custom
     }
     
     @IBAction func prepareForUnwind(segue: UIStoryboardSegue) {}
